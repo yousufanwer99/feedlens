@@ -8,3 +8,7 @@ backend/.vs/
 backend/**/*.suo
 backend/**/DocumentLayout.json
 backend/**/*.user
+
+# .NET build output
+**/obj/
+**/bin/

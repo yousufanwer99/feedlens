@@ -1,0 +1,6 @@
+@FeedLens.API_HostAddress = http://localhost:5119
+
+GET {{FeedLens.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
