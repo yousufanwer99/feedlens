@@ -27,7 +27,7 @@ FeedLens is different. The recommendation engine is transparent. You set your in
 | Frontend | Angular 17, TypeScript |
 | Backend API | .NET 8, ASP.NET Core, JWT Auth |
 | ML Service | Python 3.11, FastAPI, scikit-learn |
-| Database | SQL Server (Azure SQL free tier) |
+| Database | SQL Server (Azure SQL) |
 | Cache | Redis (Upstash) |
 | Video Storage | AWS S3 |
 | Real-time | Azure SignalR |
