@@ -2,4 +2,13 @@
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
-/.vs
+.vs/
+# Visual Studio
+backend/.vs/
+backend/**/*.suo
+backend/**/DocumentLayout.json
+backend/**/*.user
+
+# .NET build output
+**/obj/
+**/bin/
