@@ -1,0 +1,15 @@
+﻿using FeedLens.Domain.Entities;
+
+namespace FeedLens.Domain.Interfaces
+{
+    public interface IVideoRepository
+    {
+        Task<Video?> GetByIdAsync(int id);
+        Task<IEnumerable<Video>> GetAllAsync();
+        Task<IEnumerable<Video>> SearchAsync(string query);
+        Task<IEnumerable<Video>> GetByUserIdAsync(int userId);
+        Task<Video> CreateAsync(Video video);
+        Task<Video> UpdateAsync(Video video);
+        Task DeleteAsync(int id);
+    }
+}

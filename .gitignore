@@ -12,3 +12,5 @@ backend/**/*.user
 # .NET build output
 **/obj/
 **/bin/
+
+**/appsettings.Local.json
