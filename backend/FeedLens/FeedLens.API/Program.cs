@@ -33,6 +33,18 @@ var secrets = await AwsParameterStoreHelper.LoadParametersAsync(
     }
 );
 
+
+// ── Inject secrets into configuration ───────────────────
+var secretsDict = new Dictionary<string, string?>
+{
+    ["Jwt:Secret"] = secrets["/feedlens/JWT_SECRET"],
+    ["ConnectionStrings:DefaultConnection"] = secrets["/feedlens/DB_CONNECTION"],
+    ["AWS:AccessKey"] = secrets["/feedlens/AWS_ACCESS_KEY"],
+    ["AWS:SecretKey"] = secrets["/feedlens/AWS_SECRET_KEY"]
+};
+builder.Configuration.AddInMemoryCollection(secretsDict);
+
+
 var jwtSecret = secrets["/feedlens/JWT_SECRET"];
 var dbConnection = secrets["/feedlens/DB_CONNECTION"];
 var awsAccessKey = secrets["/feedlens/AWS_ACCESS_KEY"];

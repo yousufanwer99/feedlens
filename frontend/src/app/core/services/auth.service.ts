@@ -9,7 +9,7 @@ import { AuthResponse, LoginRequest, RegisterRequest, UpdateProfileRequest, User
 export class AuthService {
   private url = `${environment.apiUrl}/auth`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   register(request: RegisterRequest): Observable<ApiResponse<AuthResponse>> {
     return this.http.post<ApiResponse<AuthResponse>>(`${this.url}/register`, request).pipe(
@@ -19,7 +19,9 @@ export class AuthService {
 
   login(request: LoginRequest): Observable<ApiResponse<AuthResponse>> {
     return this.http.post<ApiResponse<AuthResponse>>(`${this.url}/login`, request).pipe(
-      tap(res => { if (res.isSuccess) this.saveToken(res.data); })
+      tap(res => {
+        if (res.isSuccess) this.saveToken(res.data);
+      })
     );
   }
 

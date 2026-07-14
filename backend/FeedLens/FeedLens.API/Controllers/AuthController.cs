@@ -14,18 +14,18 @@ namespace FeedLens.API.Controllers
 
         public AuthController(IAuthService authService) => _authService = authService;
 
-        [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterRequestDto request)
-        {
-            var result = await _authService.RegisterAsync(request);
-            return result.IsSuccess ? Ok(result) : BadRequest(result);
-        }
-
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequestDto request)
         {
             var result = await _authService.LoginAsync(request);
-            return result.IsSuccess ? Ok(result) : BadRequest(result);
+            return Ok(result);  // always 200, check isSuccess in Angular
+        }
+
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterRequestDto request)
+        {
+            var result = await _authService.RegisterAsync(request);
+            return Ok(result);  // always 200
         }
 
         [Authorize]
