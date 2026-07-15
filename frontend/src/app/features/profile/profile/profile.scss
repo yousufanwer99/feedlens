@@ -1,3 +1,28 @@
+.delete-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: rgba(0,0,0,0.7);
+  border: none;
+  color: white;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s;
+
+  &:hover { background: rgba(255,0,0,0.8); }
+}
+
+.video-thumb {
+  position: relative;
+  &:hover .delete-btn { opacity: 1; }
+}
+
 .profile-container {
   max-width: 935px;
   margin: 0 auto;

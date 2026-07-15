@@ -11,5 +11,6 @@ namespace FeedLens.Services.Interfaces
         Task<ApiResponse<IEnumerable<VideoResponseDto>>> SearchAsync(string query, int? currentUserId);
         Task<ApiResponse<IEnumerable<VideoResponseDto>>> GetMyVideosAsync(int userId);
         Task<ApiResponse<UploadUrlResponseDto>> GetUploadUrlAsync(string fileName, string contentType);
+        Task<ApiResponse<bool>> DeleteAsync(int videoId, int userId);
     }
 }

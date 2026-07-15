@@ -62,4 +62,7 @@ export class VideoService {
   saveVideo(request: VideoUploadRequest): Observable<ApiResponse<VideoResponse>> {
     return this.http.post<ApiResponse<VideoResponse>>(this.url, request);
   }
+  deleteVideo(id: number): Observable<ApiResponse<boolean>> {
+  return this.http.delete<ApiResponse<boolean>>(`${this.url}/${id}`);
+}
 }

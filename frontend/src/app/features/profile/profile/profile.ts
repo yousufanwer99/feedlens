@@ -145,4 +145,19 @@ export class Profile implements OnInit {
     if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
     return count.toString();
   }
+  deleteVideo(videoId: number, event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (!confirm('Are you sure you want to delete this video?')) return;
+
+    this.videoService.deleteVideo(videoId).subscribe({
+      next: (res) => {
+        if (res.isSuccess) {
+          this.myVideos = this.myVideos.filter(v => v.id !== videoId);
+          this.cdr.detectChanges();
+        }
+      }
+    });
+  }
 }

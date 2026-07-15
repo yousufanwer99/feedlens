@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\FeedLens.Helpers\FeedLens.Helpers.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -1,12 +1,23 @@
-﻿namespace FeedLens.Services.DTOs
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace FeedLens.Services.DTOs
 {
     public class VideoUploadDto
     {
+        [Required]
+        [MaxLength(200)]
         public string Title { get; set; } = string.Empty;
+
         public string? Description { get; set; }
+
+        [Range(1, int.MaxValue, ErrorMessage = "Please select a valid category")]
         public int CategoryId { get; set; }
+
         public string? Tags { get; set; }
+
+        [Required]
         public string S3Key { get; set; } = string.Empty;
+
         public string? ThumbnailS3Key { get; set; }
     }
     public class VideoResponseDto

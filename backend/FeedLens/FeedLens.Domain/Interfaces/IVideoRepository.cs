@@ -1,4 +1,5 @@
 ﻿using FeedLens.Domain.Entities;
+using FeedLens.Helpers;
 
 namespace FeedLens.Domain.Interfaces
 {
@@ -11,5 +12,6 @@ namespace FeedLens.Domain.Interfaces
         Task<Video> CreateAsync(Video video);
         Task<Video> UpdateAsync(Video video);
         Task DeleteAsync(int id);
+        Task IncrementViewCountAsync(int videoId);
     }
 }

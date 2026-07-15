@@ -64,6 +64,15 @@ namespace FeedLens.API.Controllers
             return result.IsSuccess ? Ok(result) : BadRequest(result);
         }
 
+        [Authorize]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var result = await _videoService.DeleteAsync(id, userId);
+            return result.IsSuccess ? Ok(result) : BadRequest(result);
+        }
+
         private int? GetCurrentUserId()
         {
             var claim = User.FindFirstValue(ClaimTypes.NameIdentifier);

@@ -64,5 +64,16 @@ namespace FeedLens.Repositories.Repositories
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task IncrementViewCountAsync(int videoId)
+        {
+            var video = await _context.Videos.FindAsync(videoId);
+            if (video != null)
+            {
+                video.ViewCount++;
+                await _context.SaveChangesAsync();
+            }
+        }
+
     }
 }

@@ -57,6 +57,8 @@ namespace FeedLens.Services.Services
                 if (video == null)
                     return ApiResponse<VideoResponseDto>.Failure("Video not found");
 
+                await _videoRepo.IncrementViewCountAsync(videoId);
+
                 var dto = await MapToDtoAsync(video, currentUserId);
                 return ApiResponse<VideoResponseDto>.Success(dto);
             }
@@ -140,6 +142,25 @@ namespace FeedLens.Services.Services
                 return ApiResponse<UploadUrlResponseDto>.Failure($"Failed to generate upload URL: {ex.Message}");
             }
         }
+
+        public async Task<ApiResponse<bool>> DeleteAsync(int videoId, int userId)
+        {
+            try
+            {
+                var video = await _videoRepo.GetByIdAsync(videoId);
+                if (video == null)
+                    return ApiResponse<bool>.Failure("Video not found");
+                if (video.UserId != userId)
+                    return ApiResponse<bool>.Failure("Unauthorized");
+
+                await _videoRepo.DeleteAsync(videoId);
+                return ApiResponse<bool>.Success(true, "Video deleted");
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<bool>.Failure($"Delete failed: {ex.Message}");
+            }
+        }
         private async Task<VideoResponseDto> MapToDtoAsync(Domain.Entities.Video video, int? currentUserId)
         {
             var likeCount = await _likeRepo.GetCountAsync(video.Id);
@@ -178,5 +199,6 @@ namespace FeedLens.Services.Services
             };
             return _s3.GetPreSignedURL(request);
         }
+
     }
 }
