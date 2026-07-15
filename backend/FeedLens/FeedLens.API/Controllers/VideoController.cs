@@ -11,8 +11,13 @@ namespace FeedLens.API.Controllers
     public class VideoController : ControllerBase
     {
         private readonly IVideoService _videoService;
+        private readonly IWatchHistoryService _watchHistoryService;
 
-        public VideoController(IVideoService videoService) => _videoService = videoService;
+        public VideoController(IVideoService videoService, IWatchHistoryService watchHistoryService)
+        {
+            _videoService = videoService;
+            _watchHistoryService = watchHistoryService;
+        }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
@@ -73,6 +78,14 @@ namespace FeedLens.API.Controllers
             return result.IsSuccess ? Ok(result) : BadRequest(result);
         }
 
+        [Authorize]
+        [HttpPost("{id}/watch")]
+        public async Task<IActionResult> RecordWatch(int id, [FromBody] WatchRequestDto request)
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var result = await _watchHistoryService.RecordWatchAsync(userId, id, request);
+            return Ok(result);
+        }
         private int? GetCurrentUserId()
         {
             var claim = User.FindFirstValue(ClaimTypes.NameIdentifier);

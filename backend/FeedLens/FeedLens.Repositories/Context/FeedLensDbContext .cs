@@ -11,6 +11,7 @@ namespace FeedLens.Repositories.Context
         public DbSet<Video> Videos { get; set; }
         public DbSet<Like> Likes { get; set; }
         public DbSet<Category> Categories { get; set; }
+        public DbSet<WatchHistory> WatchHistories { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -61,6 +62,20 @@ namespace FeedLens.Repositories.Context
                  .WithMany(v => v.Likes)
                  .HasForeignKey(l => l.VideoId)
                  .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // WatchHistory
+            modelBuilder.Entity<WatchHistory>(e =>
+            {
+                e.HasKey(w => w.Id);
+                e.HasOne(w => w.User)
+                 .WithMany()
+                 .HasForeignKey(w => w.UserId)
+                 .OnDelete(DeleteBehavior.Cascade);
+                e.HasOne(w => w.Video)
+                 .WithMany()
+                 .HasForeignKey(w => w.VideoId)
+                 .OnDelete(DeleteBehavior.NoAction);
             });
 
             // Seed categories

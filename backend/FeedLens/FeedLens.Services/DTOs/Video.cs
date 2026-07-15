@@ -53,4 +53,9 @@ namespace FeedLens.Services.DTOs
         public string Name { get; set; } = string.Empty;
         public string? Icon { get; set; }
     }
+    public class WatchRequestDto
+    {
+        public int WatchedSeconds { get; set; }
+        public int TotalSeconds { get; set; }
+    }
 }

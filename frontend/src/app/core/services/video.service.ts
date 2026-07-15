@@ -63,6 +63,12 @@ export class VideoService {
     return this.http.post<ApiResponse<VideoResponse>>(this.url, request);
   }
   deleteVideo(id: number): Observable<ApiResponse<boolean>> {
-  return this.http.delete<ApiResponse<boolean>>(`${this.url}/${id}`);
-}
+    return this.http.delete<ApiResponse<boolean>>(`${this.url}/${id}`);
+  }
+  recordWatch(videoId: number, watchedSeconds: number, totalSeconds: number): Observable<ApiResponse<boolean>> {
+    return this.http.post<ApiResponse<boolean>>(`${this.url}/${videoId}/watch`, {
+      watchedSeconds,
+      totalSeconds
+    });
+  }
 }
