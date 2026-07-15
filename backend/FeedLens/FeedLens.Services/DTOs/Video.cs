@@ -4,7 +4,7 @@
     {
         public string Title { get; set; } = string.Empty;
         public string? Description { get; set; }
-        public string Category { get; set; } = string.Empty;
+        public int CategoryId { get; set; }
         public string? Tags { get; set; }
         public string S3Key { get; set; } = string.Empty;
         public string? ThumbnailS3Key { get; set; }
@@ -14,7 +14,9 @@
         public int Id { get; set; }
         public string Title { get; set; } = string.Empty;
         public string? Description { get; set; }
-        public string Category { get; set; } = string.Empty;
+        public int CategoryId { get; set; }
+        public string CategoryName { get; set; } = string.Empty;
+        public string? CategoryIcon { get; set; }
         public string? Tags { get; set; }
         public string VideoUrl { get; set; } = string.Empty;
         public string? ThumbnailUrl { get; set; }
@@ -33,5 +35,11 @@
     {
         public string UploadUrl { get; set; } = string.Empty;
         public string S3Key { get; set; } = string.Empty;
+    }
+    public class CategoryResponseDto
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string? Icon { get; set; }
     }
 }

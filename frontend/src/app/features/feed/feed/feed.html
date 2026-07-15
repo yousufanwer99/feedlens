@@ -53,7 +53,7 @@
               {{ video.uploaderName }} · {{ formatViews(video.viewCount) }} views · {{ formatDate(video.createdAt) }}
             </p>
             <div class="video-tags-row">
-              <span class="video-category">{{ video.category }}</span>
+             <span class="video-category">{{ video.categoryIcon }} {{ video.categoryName }}</span>
               <button
                 class="like-btn"
                 [class.liked]="video.isLikedByCurrentUser"

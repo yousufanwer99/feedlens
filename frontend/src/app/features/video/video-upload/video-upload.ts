@@ -1,9 +1,10 @@
-import { Component, ChangeDetectorRef } from '@angular/core';
+import { Component, ChangeDetectorRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { HttpEventType } from '@angular/common/http';
 import { VideoService } from '../../../core/services/video.service';
+import { CategoryService } from '../../../core/services/category.service';
+import { Category } from '../../../shared/models/category.model';
 
 @Component({
   selector: 'app-video-upload',
@@ -12,31 +13,37 @@ import { VideoService } from '../../../core/services/video.service';
   templateUrl: './video-upload.html',
   styleUrl: './video-upload.scss'
 })
-export class VideoUpload {
+export class VideoUpload implements OnInit {
   selectedFile: File | null = null;
   videoPreviewUrl: string | null = null;
   uploadProgress = 0;
   isUploading = false;
   errorMessage = '';
   successMessage = '';
+  categories: Category[] = [];
 
   form = {
     title: '',
     description: '',
-    category: '',
+    categoryId: 0,
     tags: ''
   };
 
-  categories = [
-    'Tech', 'Finance', 'Education', 'Entertainment',
-    'Sports', 'Music', 'Gaming', 'Travel', 'Food', 'Other'
-  ];
-
   constructor(
     private videoService: VideoService,
+    private categoryService: CategoryService,
     private router: Router,
     private cdr: ChangeDetectorRef
   ) { }
+
+  ngOnInit(): void {
+    this.categoryService.getAll().subscribe({
+      next: (res) => {
+        if (res.isSuccess) this.categories = res.data;
+        this.cdr.detectChanges();
+      }
+    });
+  }
 
   onFileSelected(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0];
@@ -62,7 +69,7 @@ export class VideoUpload {
   onSubmit(): void {
     if (!this.selectedFile) { this.errorMessage = 'Please select a video'; return; }
     if (!this.form.title.trim()) { this.errorMessage = 'Title is required'; return; }
-    if (!this.form.category) { this.errorMessage = 'Category is required'; return; }
+    if (!this.form.categoryId) { this.errorMessage = 'Category is required'; return; }
 
     this.isUploading = true;
     this.errorMessage = '';
@@ -112,7 +119,7 @@ export class VideoUpload {
     this.videoService.saveVideo({
       title: this.form.title,
       description: this.form.description || null,
-      category: this.form.category,
+      categoryId: this.form.categoryId,
       tags,
       s3Key,
       thumbnailS3Key: null

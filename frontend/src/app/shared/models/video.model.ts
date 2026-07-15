@@ -1,7 +1,7 @@
 export interface VideoUploadRequest {
   title: string;
   description: string | null;
-  category: string;
+  categoryId: number;
   tags: string | null;
   s3Key: string;
   thumbnailS3Key: string | null;
@@ -11,7 +11,9 @@ export interface VideoResponse {
   id: number;
   title: string;
   description: string | null;
-  category: string;
+  categoryId: number;
+  categoryName: string;
+  categoryIcon: string | null;
   tags: string | null;
   videoUrl: string;
   thumbnailUrl: string | null;

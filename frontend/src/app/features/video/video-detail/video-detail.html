@@ -62,7 +62,7 @@
       }
 
       <div class="tags-row">
-        <span class="category-badge">{{ video.category }}</span>
+        <span class="category-badge">{{ video.categoryIcon }} {{ video.categoryName }}</span>
         @for (tag of parseTags(video.tags); track tag) {
           <span class="tag">#{{ tag }}</span>
         }

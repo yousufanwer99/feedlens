@@ -6,6 +6,8 @@ import { AuthService } from '../../../core/services/auth.service';
 import { VideoService } from '../../../core/services/video.service';
 import { UserProfile, UpdateProfileRequest } from '../../../shared/models/auth.model';
 import { VideoResponse } from '../../../shared/models/video.model';
+import { CategoryService } from '../../../core/services/category.service';
+import { Category } from '../../../shared/models/category.model';
 
 @Component({
   selector: 'app-profile',
@@ -26,10 +28,7 @@ export class Profile implements OnInit {
 
   editForm: UpdateProfileRequest = {};
 
-  categories = [
-    'Tech', 'Finance', 'Education', 'Entertainment',
-    'Sports', 'Music', 'Gaming', 'Travel', 'Food', 'Other'
-  ];
+  categories: Category[] = [];
 
   selectedPreferred: string[] = [];
   selectedAvoid: string[] = [];
@@ -37,14 +36,24 @@ export class Profile implements OnInit {
   constructor(
     private authService: AuthService,
     private videoService: VideoService,
+    private categoryService: CategoryService,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) { }
 
   ngOnInit(): void {
+    this.loadCategories();
     this.loadProfile();
     this.loadMyVideos();
   }
 
+  loadCategories(): void {
+    this.categoryService.getAll().subscribe({
+      next: (res) => {
+        if (res.isSuccess) this.categories = res.data;
+        this.cdr.detectChanges();
+      }
+    });
+  }
   loadProfile(): void {
     this.authService.getProfile().subscribe({
       next: (res) => {

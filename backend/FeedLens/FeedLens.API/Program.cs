@@ -83,11 +83,15 @@ builder.Services.AddAuthorization();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IVideoRepository, VideoRepository>();
 builder.Services.AddScoped<ILikeRepository, LikeRepository>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+
 
 // ── Services ────────────────────────────────────────────
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IVideoService, VideoService>();
 builder.Services.AddScoped<ILikeService, LikeService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+
 
 // ── CORS ────────────────────────────────────────────────
 builder.Services.AddCors(options =>

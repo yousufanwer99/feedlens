@@ -31,7 +31,7 @@ namespace FeedLens.Services.Services
                 {
                     Title = request.Title,
                     Description = request.Description,
-                    Category = request.Category,
+                    CategoryId = request.CategoryId,
                     Tags = request.Tags,
                     S3Key = request.S3Key,
                     ThumbnailS3Key = request.ThumbnailS3Key,
@@ -39,7 +39,8 @@ namespace FeedLens.Services.Services
                 };
 
                 var created = await _videoRepo.CreateAsync(video);
-                var dto = await MapToDtoAsync(created, userId);
+                var full = await _videoRepo.GetByIdAsync(created.Id);
+                var dto = await MapToDtoAsync(full!, userId);
                 return ApiResponse<VideoResponseDto>.Success(dto, "Video uploaded successfully");
             }
             catch (Exception ex)
@@ -151,7 +152,9 @@ namespace FeedLens.Services.Services
                 Id = video.Id,
                 Title = video.Title,
                 Description = video.Description,
-                Category = video.Category,
+                CategoryId = video.CategoryId,
+                CategoryName = video.Category?.Name ?? string.Empty,
+                CategoryIcon = video.Category?.Icon,
                 Tags = video.Tags,
                 VideoUrl = videoUrl,
                 ThumbnailUrl = thumbnailUrl,

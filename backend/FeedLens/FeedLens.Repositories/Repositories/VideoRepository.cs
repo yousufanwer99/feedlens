@@ -11,26 +11,35 @@ namespace FeedLens.Repositories.Repositories
 
         public VideoRepository(FeedLensDbContext context) => _context = context;
 
-        public async Task<Video?> GetByIdAsync(int id) => await _context.Videos.Include(v => v.User).FirstOrDefaultAsync(v => v.Id == id);
+        public async Task<Video?> GetByIdAsync(int id) =>
+        await _context.Videos
+        .Include(v => v.User)
+        .Include(v => v.Category)
+        .FirstOrDefaultAsync(v => v.Id == id);
 
-        public async Task<IEnumerable<Video>> GetAllAsync() => await _context.Videos.Include(v => v.User).OrderByDescending(v => v.CreatedAt).ToListAsync();
+        public async Task<IEnumerable<Video>> GetAllAsync() =>
+    await _context.Videos
+        .Include(v => v.User)
+        .Include(v => v.Category)
+        .OrderByDescending(v => v.CreatedAt)
+        .ToListAsync();
 
-        public async Task<IEnumerable<Video>> SearchAsync(string query)
-        {
-            var videos = await _context.Videos
-                  .Include(v => v.User)
-                  .Where(v => v.Title.Contains(query) ||
-                              v.Tags!.Contains(query) ||
-                              v.Category.Contains(query))
-                  .OrderByDescending(v => v.CreatedAt)
-                  .ToListAsync();
-            return videos;
-        }
+        public async Task<IEnumerable<Video>> SearchAsync(string query) =>
+         await _context.Videos
+             .Include(v => v.User)
+             .Include(v => v.Category)
+             .Where(v => v.Title.Contains(query) ||
+                         v.Tags!.Contains(query) ||
+                         v.Category.Name.Contains(query))
+             .OrderByDescending(v => v.CreatedAt)
+             .ToListAsync();
+
         public async Task<IEnumerable<Video>> GetByUserIdAsync(int userId) =>
-            await _context.Videos
-                .Where(v => v.UserId == userId)
-                .OrderByDescending(v => v.CreatedAt)
-                .ToListAsync();
+         await _context.Videos
+        .Include(v => v.Category)
+        .Where(v => v.UserId == userId)
+        .OrderByDescending(v => v.CreatedAt)
+        .ToListAsync();
 
         public async Task<Video> CreateAsync(Video video)
         {
