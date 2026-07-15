@@ -25,73 +25,120 @@ namespace FeedLens.Services.Services
 
         public async Task<ApiResponse<VideoResponseDto>> UploadAsync(int userId, VideoUploadDto request)
         {
-            var video = new Domain.Entities.Video
+            try
             {
-                Title = request.Title,
-                Description = request.Description,
-                Category = request.Category,
-                Tags = request.Tags,
-                S3Key = request.S3Key,
-                ThumbnailS3Key = request.ThumbnailS3Key,
-                UserId = userId
-            };
+                var video = new Domain.Entities.Video
+                {
+                    Title = request.Title,
+                    Description = request.Description,
+                    Category = request.Category,
+                    Tags = request.Tags,
+                    S3Key = request.S3Key,
+                    ThumbnailS3Key = request.ThumbnailS3Key,
+                    UserId = userId
+                };
 
-            var created = await _videoRepo.CreateAsync(video);
-            var dto = await MapToDtoAsync(created, userId);
-            return ApiResponse<VideoResponseDto>.Success(dto, "Video uploaded successfully");
+                var created = await _videoRepo.CreateAsync(video);
+                var dto = await MapToDtoAsync(created, userId);
+                return ApiResponse<VideoResponseDto>.Success(dto, "Video uploaded successfully");
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<VideoResponseDto>.Failure($"Upload failed: {ex.Message}");
+            }
         }
 
         public async Task<ApiResponse<VideoResponseDto>> GetByIdAsync(int videoId, int? currentUserId)
         {
-            var video = await _videoRepo.GetByIdAsync(videoId);
-            if (video == null)
-                return ApiResponse<VideoResponseDto>.Failure("Video not found");
+            try
+            {
+                var video = await _videoRepo.GetByIdAsync(videoId);
+                if (video == null)
+                    return ApiResponse<VideoResponseDto>.Failure("Video not found");
 
-            var dto = await MapToDtoAsync(video, currentUserId);
-            return ApiResponse<VideoResponseDto>.Success(dto);
+                var dto = await MapToDtoAsync(video, currentUserId);
+                return ApiResponse<VideoResponseDto>.Success(dto);
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<VideoResponseDto>.Failure($"Failed to get video: {ex.Message}");
+            }
         }
 
         public async Task<ApiResponse<IEnumerable<VideoResponseDto>>> GetAllAsync(int? currentUserId)
         {
-            var videos = await _videoRepo.GetAllAsync();
-            var dtos = await Task.WhenAll(videos.Select(v => MapToDtoAsync(v, currentUserId)));
-            return ApiResponse<IEnumerable<VideoResponseDto>>.Success(dtos);
+            try
+            {
+                var videos = await _videoRepo.GetAllAsync();
+                var dtos = new List<VideoResponseDto>();
+                foreach (var v in videos)
+                    dtos.Add(await MapToDtoAsync(v, currentUserId));
+                return ApiResponse<IEnumerable<VideoResponseDto>>.Success(dtos);
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<IEnumerable<VideoResponseDto>>.Failure($"Failed to load videos: {ex.Message}");
+            }
         }
 
         public async Task<ApiResponse<IEnumerable<VideoResponseDto>>> SearchAsync(string query, int? currentUserId)
         {
-            var videos = await _videoRepo.SearchAsync(query);
-            var dtos = await Task.WhenAll(videos.Select(v => MapToDtoAsync(v, currentUserId)));
-            return ApiResponse<IEnumerable<VideoResponseDto>>.Success(dtos);
+            try
+            {
+                var videos = await _videoRepo.SearchAsync(query);
+                var dtos = new List<VideoResponseDto>();
+                foreach (var v in videos)
+                    dtos.Add(await MapToDtoAsync(v, currentUserId));
+                return ApiResponse<IEnumerable<VideoResponseDto>>.Success(dtos);
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<IEnumerable<VideoResponseDto>>.Failure($"Search failed: {ex.Message}");
+            }
         }
 
         public async Task<ApiResponse<IEnumerable<VideoResponseDto>>> GetMyVideosAsync(int userId)
         {
-            var videos = await _videoRepo.GetByUserIdAsync(userId);
-            var dtos = await Task.WhenAll(videos.Select(v => MapToDtoAsync(v, userId)));
-            return ApiResponse<IEnumerable<VideoResponseDto>>.Success(dtos);
+            try
+            {
+                var videos = await _videoRepo.GetByUserIdAsync(userId);
+                var dtos = new List<VideoResponseDto>();
+                foreach (var v in videos)
+                    dtos.Add(await MapToDtoAsync(v, userId));
+                return ApiResponse<IEnumerable<VideoResponseDto>>.Success(dtos);
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<IEnumerable<VideoResponseDto>>.Failure($"Failed to load your videos: {ex.Message}");
+            }
         }
 
         public async Task<ApiResponse<UploadUrlResponseDto>> GetUploadUrlAsync(string fileName, string contentType)
         {
-            var key = $"videos/{Guid.NewGuid()}/{fileName}";
-            var request = new GetPreSignedUrlRequest
+            try
             {
-                BucketName = _config["AWS:BucketName"],
-                Key = key,
-                Verb = HttpVerb.PUT,
-                ContentType = contentType,
-                Expires = DateTime.UtcNow.AddMinutes(15)
-            };
+                var key = $"videos/{Guid.NewGuid()}/{fileName}";
+                var request = new GetPreSignedUrlRequest
+                {
+                    BucketName = _config["AWS:BucketName"],
+                    Key = key,
+                    Verb = HttpVerb.PUT,
+                    ContentType = contentType,
+                    Expires = DateTime.UtcNow.AddMinutes(15)
+                };
 
-            var url = await _s3.GetPreSignedURLAsync(request);
-            return ApiResponse<UploadUrlResponseDto>.Success(new UploadUrlResponseDto
+                var url = await _s3.GetPreSignedURLAsync(request);
+                return ApiResponse<UploadUrlResponseDto>.Success(new UploadUrlResponseDto
+                {
+                    UploadUrl = url,
+                    S3Key = key
+                });
+            }
+            catch (Exception ex)
             {
-                UploadUrl = url,
-                S3Key = key
-            });
+                return ApiResponse<UploadUrlResponseDto>.Failure($"Failed to generate upload URL: {ex.Message}");
+            }
         }
-
         private async Task<VideoResponseDto> MapToDtoAsync(Domain.Entities.Video video, int? currentUserId)
         {
             var likeCount = await _likeRepo.GetCountAsync(video.Id);

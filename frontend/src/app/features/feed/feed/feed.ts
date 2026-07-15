@@ -1,9 +1,102 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterLink, ActivatedRoute } from '@angular/router';
+import { VideoService } from '../../../core/services/video.service';
+import { LikeService } from '../../../core/services/like.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { VideoResponse } from '../../../shared/models/video.model';
 
 @Component({
   selector: 'app-feed',
-  imports: [],
+  standalone: true,
+  imports: [CommonModule, RouterLink],
   templateUrl: './feed.html',
-  styleUrl: './feed.scss',
+  styleUrl: './feed.scss'
 })
-export class Feed {}
+export class Feed implements OnInit {
+  videos: VideoResponse[] = [];
+  isLoading = true;
+  searchQuery = '';
+
+  constructor(
+    private videoService: VideoService,
+    private likeService: LikeService,
+    public authService: AuthService,
+    private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef
+  ) {}
+
+  ngOnInit(): void {
+    this.route.queryParams.subscribe(params => {
+      if (params['search']) {
+        this.searchQuery = params['search'];
+        this.searchVideos(params['search']);
+      } else {
+        this.loadVideos();
+      }
+    });
+  }
+
+  loadVideos(): void {
+    this.isLoading = true;
+    this.videoService.getAll().subscribe({
+      next: (res) => {
+        this.isLoading = false;
+        if (res.isSuccess) this.videos = res.data;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  searchVideos(query: string): void {
+    this.isLoading = true;
+    this.videoService.search(query).subscribe({
+      next: (res) => {
+        this.isLoading = false;
+        if (res.isSuccess) this.videos = res.data;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  toggleLike(video: VideoResponse, event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (!this.authService.isLoggedIn()) return;
+
+    this.likeService.toggleLike(video.id).subscribe({
+      next: (res) => {
+        if (res.isSuccess) {
+          video.isLikedByCurrentUser = res.data;
+          video.likeCount += res.data ? 1 : -1;
+          this.cdr.detectChanges();
+        }
+      }
+    });
+  }
+
+  formatDate(dateStr: string): string {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diff = Math.floor((now.getTime() - date.getTime()) / 1000);
+    if (diff < 60) return 'just now';
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+    return `${Math.floor(diff / 86400)}d ago`;
+  }
+
+  formatViews(count: number): string {
+    if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`;
+    if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
+    return count.toString();
+  }
+}

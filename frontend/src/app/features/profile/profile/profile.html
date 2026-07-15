@@ -1,1 +1,141 @@
-<p>profile works!</p>
+<div class="profile-container">
+
+  @if (isLoading) {
+    <div class="loading-state">
+      <div class="skeleton-avatar"></div>
+      <div class="skeleton-line long"></div>
+      <div class="skeleton-line short"></div>
+    </div>
+  } @else if (profile) {
+
+    <div class="profile-header">
+      <div class="avatar-large">
+        {{ profile.fullName.charAt(0).toUpperCase() }}
+      </div>
+      <div class="profile-info">
+        @if (!isEditing) {
+          <h1 class="profile-name">{{ profile.fullName }}</h1>
+          <p class="profile-email">{{ profile.email }}</p>
+          @if (profile.bio) {
+            <p class="profile-bio">{{ profile.bio }}</p>
+          }
+          <p class="profile-joined">Joined {{ formatDate(profile.createdAt) }}</p>
+          <div class="profile-actions">
+            <button class="btn-edit" (click)="isEditing = true">Edit profile</button>
+            <a routerLink="/upload" class="btn-upload">Upload video</a>
+          </div>
+        } @else {
+          <div class="edit-form">
+            <div class="form-group">
+              <label>Full name</label>
+              <input type="text" [(ngModel)]="editForm.fullName" placeholder="Your name"/>
+            </div>
+            <div class="form-group">
+              <label>Bio</label>
+              <textarea [(ngModel)]="editForm.bio" placeholder="Tell us about yourself"></textarea>
+            </div>
+            <div class="edit-actions">
+              <button class="btn-save" (click)="saveProfile()" [disabled]="isSaving">
+                {{ isSaving ? 'Saving...' : 'Save changes' }}
+              </button>
+              <button class="btn-cancel" (click)="isEditing = false">Cancel</button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    @if (successMessage) {
+      <p class="success-message">{{ successMessage }}</p>
+    }
+    @if (errorMessage) {
+      <p class="error-message">{{ errorMessage }}</p>
+    }
+
+    <div class="profile-tabs">
+      <button
+        class="tab-btn"
+        [class.active]="activeTab === 'videos'"
+        (click)="activeTab = 'videos'">
+        Videos ({{ myVideos.length }})
+      </button>
+      <button
+        class="tab-btn"
+        [class.active]="activeTab === 'settings'"
+        (click)="activeTab = 'settings'">
+        Algorithm settings
+      </button>
+    </div>
+
+    @if (activeTab === 'videos') {
+      @if (myVideos.length === 0) {
+        <div class="empty-state">
+          <p>You haven't uploaded any videos yet.</p>
+          <a routerLink="/upload" class="btn-upload">Upload your first video</a>
+        </div>
+      } @else {
+        <div class="videos-grid">
+          @for (video of myVideos; track video.id) {
+            <a [routerLink]="['/video', video.id]" class="video-card">
+              <div class="video-thumb">
+                @if (video.thumbnailUrl) {
+                  <img [src]="video.thumbnailUrl" [alt]="video.title"/>
+                } @else {
+                  <div class="thumb-placeholder">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                      <polygon points="5 3 19 12 5 21 5 3"/>
+                    </svg>
+                  </div>
+                }
+              </div>
+              <div class="video-info">
+                <p class="video-title">{{ video.title }}</p>
+                <p class="video-meta">{{ formatViews(video.viewCount) }} views · {{ video.likeCount }} likes</p>
+              </div>
+            </a>
+          }
+        </div>
+      }
+    }
+
+    @if (activeTab === 'settings') {
+      <div class="algo-settings">
+        <div class="settings-section">
+          <h3>Preferred categories</h3>
+          <p class="settings-hint">FeedLens will show more of these in your feed</p>
+          <div class="category-grid">
+            @for (cat of categories; track cat) {
+              <button
+                class="cat-btn"
+                [class.selected]="isSelected(cat, 'preferred')"
+                (click)="toggleCategory(cat, 'preferred')">
+                {{ cat }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <h3>Avoid categories</h3>
+          <p class="settings-hint">FeedLens will show less of these in your feed</p>
+          <div class="category-grid">
+            @for (cat of categories; track cat) {
+              <button
+                class="cat-btn avoid"
+                [class.selected]="isSelected(cat, 'avoid')"
+                (click)="toggleCategory(cat, 'avoid')">
+                {{ cat }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <button class="btn-save-algo" (click)="saveProfile()" [disabled]="isSaving">
+          {{ isSaving ? 'Saving...' : 'Save algorithm settings' }}
+        </button>
+      </div>
+    }
+
+  }
+
+</div>

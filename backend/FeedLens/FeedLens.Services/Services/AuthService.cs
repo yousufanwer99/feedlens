@@ -24,72 +24,99 @@ namespace FeedLens.Services.Services
 
         public async Task<ApiResponse<AuthResponseDto>> RegisterAsync(RegisterRequestDto request)
         {
-            var existing = await _userRepo.GetByEmailAsync(request.Email);
-            if (existing != null)
-                return ApiResponse<AuthResponseDto>.Failure("Email already registered");
-
-            var user = new User
+            try
             {
-                FullName = request.FullName,
-                Email = request.Email,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password)
-            };
+                var existing = await _userRepo.GetByEmailAsync(request.Email);
+                if (existing != null)
+                    return ApiResponse<AuthResponseDto>.Failure("Email already registered");
 
-            var created = await _userRepo.CreateAsync(user);
-            var token = GenerateToken(created);
+                var user = new User
+                {
+                    FullName = request.FullName,
+                    Email = request.Email,
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password)
+                };
 
-            return ApiResponse<AuthResponseDto>.Success(new AuthResponseDto
+                var created = await _userRepo.CreateAsync(user);
+                var token = GenerateToken(created);
+
+                return ApiResponse<AuthResponseDto>.Success(new AuthResponseDto
+                {
+                    UserId = created.Id,
+                    FullName = created.FullName,
+                    Email = created.Email,
+                    Token = token,
+                    Role = created.Role.ToString()
+                }, "Registration successful");
+            }
+            catch (Exception ex)
             {
-                UserId = created.Id,
-                FullName = created.FullName,
-                Email = created.Email,
-                Token = token,
-                Role = created.Role.ToString()
-            }, "Registration successful");
+                return ApiResponse<AuthResponseDto>.Failure($"Registration failed: {ex.Message}");
+            }
         }
 
         public async Task<ApiResponse<AuthResponseDto>> LoginAsync(LoginRequestDto request)
         {
-            var user = await _userRepo.GetByEmailAsync(request.Email);
-            if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
-                return ApiResponse<AuthResponseDto>.Failure("Invalid email or password");
-
-            var token = GenerateToken(user);
-
-            return ApiResponse<AuthResponseDto>.Success(new AuthResponseDto
+            try
             {
-                UserId = user.Id,
-                FullName = user.FullName,
-                Email = user.Email,
-                Token = token,
-                Role = user.Role.ToString()
-            }, "Login successful");
+                var user = await _userRepo.GetByEmailAsync(request.Email);
+                if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+                    return ApiResponse<AuthResponseDto>.Failure("Invalid email or password");
+
+                var token = GenerateToken(user);
+
+                return ApiResponse<AuthResponseDto>.Success(new AuthResponseDto
+                {
+                    UserId = user.Id,
+                    FullName = user.FullName,
+                    Email = user.Email,
+                    Token = token,
+                    Role = user.Role.ToString()
+                }, "Login successful");
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<AuthResponseDto>.Failure($"Login failed: {ex.Message}");
+            }
         }
 
         public async Task<ApiResponse<UserProfileDto>> GetProfileAsync(int userId)
         {
-            var user = await _userRepo.GetByIdAsync(userId);
-            if (user == null)
-                return ApiResponse<UserProfileDto>.Failure("User not found");
+            try
+            {
+                var user = await _userRepo.GetByIdAsync(userId);
+                if (user == null)
+                    return ApiResponse<UserProfileDto>.Failure("User not found");
 
-            return ApiResponse<UserProfileDto>.Success(MapToProfileDto(user));
+                return ApiResponse<UserProfileDto>.Success(MapToProfileDto(user));
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<UserProfileDto>.Failure($"Failed to get profile: {ex.Message}");
+            }
         }
 
         public async Task<ApiResponse<UserProfileDto>> UpdateProfileAsync(int userId, UpdateProfileDto request)
         {
-            var user = await _userRepo.GetByIdAsync(userId);
-            if (user == null)
-                return ApiResponse<UserProfileDto>.Failure("User not found");
+            try
+            {
+                var user = await _userRepo.GetByIdAsync(userId);
+                if (user == null)
+                    return ApiResponse<UserProfileDto>.Failure("User not found");
 
-            if (request.FullName != null) user.FullName = request.FullName;
-            if (request.Bio != null) user.Bio = request.Bio;
-            if (request.PreferredCategories != null) user.PreferredCategories = request.PreferredCategories;
-            if (request.AvoidCategories != null) user.AvoidCategories = request.AvoidCategories;
+                if (request.FullName != null) user.FullName = request.FullName;
+                if (request.Bio != null) user.Bio = request.Bio;
+                if (request.PreferredCategories != null) user.PreferredCategories = request.PreferredCategories;
+                if (request.AvoidCategories != null) user.AvoidCategories = request.AvoidCategories;
 
-            var updated = await _userRepo.UpdateAsync(user);
-            return ApiResponse<UserProfileDto>.Success(MapToProfileDto(updated), "Profile updated");
+                var updated = await _userRepo.UpdateAsync(user);
+                return ApiResponse<UserProfileDto>.Success(MapToProfileDto(updated), "Profile updated");
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<UserProfileDto>.Failure($"Failed to update profile: {ex.Message}");
+            }
         }
-
         private string GenerateToken(User user)
         {
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Secret"]!));

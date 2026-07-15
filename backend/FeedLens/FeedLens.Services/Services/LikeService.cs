@@ -18,19 +18,26 @@ namespace FeedLens.Services.Services
 
         public async Task<ApiResponse<bool>> ToggleLikeAsync(int userId, int videoId)
         {
-            var video = await _videoRepo.GetByIdAsync(videoId);
-            if (video == null)
-                return ApiResponse<bool>.Failure("Video not found");
-
-            var existing = await _likeRepo.GetAsync(userId, videoId);
-            if (existing != null)
+            try
             {
-                await _likeRepo.DeleteAsync(userId, videoId);
-                return ApiResponse<bool>.Success(false, "Video unliked");
-            }
+                var video = await _videoRepo.GetByIdAsync(videoId);
+                if (video == null)
+                    return ApiResponse<bool>.Failure("Video not found");
 
-            await _likeRepo.CreateAsync(new Like { UserId = userId, VideoId = videoId });
-            return ApiResponse<bool>.Success(true, "Video liked");
+                var existing = await _likeRepo.GetAsync(userId, videoId);
+                if (existing != null)
+                {
+                    await _likeRepo.DeleteAsync(userId, videoId);
+                    return ApiResponse<bool>.Success(false, "Video unliked");
+                }
+
+                await _likeRepo.CreateAsync(new Like { UserId = userId, VideoId = videoId });
+                return ApiResponse<bool>.Success(true, "Video liked");
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<bool>.Failure($"Failed to toggle like: {ex.Message}");
+            }
         }
     }
 }

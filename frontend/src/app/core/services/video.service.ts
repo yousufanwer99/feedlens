@@ -9,7 +9,7 @@ import { UploadUrlResponse, VideoResponse, VideoUploadRequest } from '../../shar
 export class VideoService {
   private url = `${environment.apiUrl}/video`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getAll(): Observable<ApiResponse<VideoResponse[]>> {
     return this.http.get<ApiResponse<VideoResponse[]>>(this.url);
@@ -33,11 +33,29 @@ export class VideoService {
     );
   }
 
-  uploadToS3(uploadUrl: string, file: File): Observable<any> {
-    return this.http.put(uploadUrl, file, {
-      headers: { 'Content-Type': file.type },
-      reportProgress: true,
-      observe: 'events'
+  uploadToS3(uploadUrl: string, file: File): Observable<number> {
+    return new Observable(observer => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('PUT', uploadUrl, true);
+      xhr.setRequestHeader('Content-Type', file.type);
+
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const percent = Math.round((event.loaded / event.total) * 100);
+          observer.next(percent);
+        }
+      };
+
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          observer.complete();
+        } else {
+          observer.error(xhr.responseText);
+        }
+      };
+
+      xhr.onerror = () => observer.error('Upload failed');
+      xhr.send(file);
     });
   }
 

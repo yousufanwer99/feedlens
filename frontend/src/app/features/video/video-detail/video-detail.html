@@ -1,1 +1,74 @@
-<p>video-detail works!</p>
+<div class="detail-container">
+
+  @if (isLoading) {
+    <div class="loading-state">
+      <div class="skeleton-player"></div>
+      <div class="skeleton-info">
+        <div class="skeleton-line long"></div>
+        <div class="skeleton-line short"></div>
+      </div>
+    </div>
+  } @else if (error) {
+    <div class="error-state">
+      <h3>{{ error }}</h3>
+      <a routerLink="/feed" class="btn-primary" style="width:auto;display:inline-block;padding:10px 24px">
+        Back to feed
+      </a>
+    </div>
+  } @else if (video) {
+    <div class="video-player-wrap">
+      <video
+        [src]="video.videoUrl"
+        controls
+        autoplay
+        class="video-player">
+      </video>
+    </div>
+
+    <div class="video-meta-section">
+      <h1 class="video-title">{{ video.title }}</h1>
+
+      <div class="meta-row">
+        <div class="uploader-info">
+          <div class="avatar">{{ video.uploaderName.charAt(0).toUpperCase() }}</div>
+          <div>
+            <p class="uploader-name">{{ video.uploaderName }}</p>
+            <p class="upload-date">{{ formatDate(video.createdAt) }}</p>
+          </div>
+        </div>
+
+        <div class="action-row">
+          <span class="view-count">{{ video.viewCount }} views</span>
+
+          <button
+            class="like-btn"
+            [class.liked]="video.isLikedByCurrentUser"
+            (click)="toggleLike()"
+            [disabled]="!authService.isLoggedIn()">
+            <svg width="20" height="20" viewBox="0 0 24 24"
+              [attr.fill]="video.isLikedByCurrentUser ? 'currentColor' : 'none'"
+              stroke="currentColor" stroke-width="2">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+            {{ video.likeCount }} {{ video.likeCount === 1 ? 'like' : 'likes' }}
+          </button>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      @if (video.description) {
+        <p class="video-description">{{ video.description }}</p>
+      }
+
+      <div class="tags-row">
+        <span class="category-badge">{{ video.category }}</span>
+        @for (tag of parseTags(video.tags); track tag) {
+          <span class="tag">#{{ tag }}</span>
+        }
+      </div>
+
+    </div>
+  }
+
+</div>

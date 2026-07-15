@@ -1,1 +1,76 @@
-<p>feed works!</p>
+<div class="feed-container">
+
+  @if (searchQuery) {
+    <div class="search-header">
+      <h2>Results for "{{ searchQuery }}"</h2>
+      <span class="result-count">{{ videos.length }} videos found</span>
+    </div>
+  }
+
+  @if (isLoading) {
+    <div class="loading-grid">
+      @for (item of [1,2,3,4,5,6,7,8,9]; track item) {
+        <div class="skeleton-card">
+          <div class="skeleton-thumb"></div>
+          <div class="skeleton-info">
+            <div class="skeleton-line long"></div>
+            <div class="skeleton-line short"></div>
+          </div>
+        </div>
+      }
+    </div>
+  } @else if (videos.length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">🎬</div>
+      <h3>No videos yet</h3>
+      <p>Be the first to upload a video</p>
+    </div>
+  } @else {
+    <div class="video-grid">
+      @for (video of videos; track video.id) {
+        <a [routerLink]="['/video', video.id]" class="video-card">
+
+          <div class="video-thumb">
+            @if (video.thumbnailUrl) {
+              <img [src]="video.thumbnailUrl" [alt]="video.title" loading="lazy"/>
+            } @else {
+              <div class="thumb-placeholder">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <polygon points="5 3 19 12 5 21 5 3"/>
+                </svg>
+              </div>
+            }
+            <div class="video-overlay">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="white">
+                <polygon points="5 3 19 12 5 21 5 3"/>
+              </svg>
+            </div>
+          </div>
+
+          <div class="video-info">
+            <h3 class="video-title">{{ video.title }}</h3>
+            <p class="video-meta">
+              {{ video.uploaderName }} · {{ formatViews(video.viewCount) }} views · {{ formatDate(video.createdAt) }}
+            </p>
+            <div class="video-tags-row">
+              <span class="video-category">{{ video.category }}</span>
+              <button
+                class="like-btn"
+                [class.liked]="video.isLikedByCurrentUser"
+                (click)="toggleLike(video, $event)">
+                <svg width="16" height="16" viewBox="0 0 24 24"
+                  [attr.fill]="video.isLikedByCurrentUser ? 'currentColor' : 'none'"
+                  stroke="currentColor" stroke-width="2">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+                {{ video.likeCount }}
+              </button>
+            </div>
+          </div>
+
+        </a>
+      }
+    </div>
+  }
+
+</div>
