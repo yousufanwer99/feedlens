@@ -105,9 +105,12 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("FeedLensPolicy", policy =>
     {
-        policy.WithOrigins(
+            policy.WithOrigins
+            (
                 "http://localhost:4200",
-                "https://feedlens.vercel.app")
+                "https://feedlens-nine.vercel.app",
+                "https://feedlens-production.up.railway.app"
+            )
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
