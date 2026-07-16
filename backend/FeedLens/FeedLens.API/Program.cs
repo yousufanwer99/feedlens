@@ -50,9 +50,16 @@ var dbConnection = secrets["/feedlens/DB_CONNECTION"];
 var awsAccessKey = secrets["/feedlens/AWS_ACCESS_KEY"];
 var awsSecretKey = secrets["/feedlens/AWS_SECRET_KEY"];
 
-
 // ── Database ────────────────────────────────────────────
-builder.Services.AddDbContext<FeedLensDbContext>(options => options.UseSqlServer(dbConnection));
+builder.Services.AddDbContext<FeedLensDbContext>(options =>
+    options.UseSqlServer(dbConnection, sqlOptions =>
+        sqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 5,
+            maxRetryDelay: TimeSpan.FromSeconds(30),
+            errorNumbersToAdd: null
+        )
+    )
+);
 
 
 // ── AWS ─────────────────────────────────────────────────
