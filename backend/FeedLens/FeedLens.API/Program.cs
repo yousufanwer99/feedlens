@@ -136,7 +136,7 @@ builder.Services.AddControllers();
 var app = builder.Build();
 
 // ── Middleware pipeline ──────────────────────────────────
-if (app.Environment.IsDevelopment())
+//if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
