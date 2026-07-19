@@ -17,6 +17,15 @@ export class Feed implements OnInit {
   videos: VideoResponse[] = [];
   isLoading = true;
   searchQuery = '';
+  currentMode = 'Spectrum';
+
+  modes = [
+    { name: 'Flare', icon: '🔥', tagline: 'What\'s burning right now', status: 'available' },
+    { name: 'Drift', icon: '🎲', tagline: 'Let the feed surprise you', status: 'available' },
+    { name: 'Spectrum', icon: '⚡', tagline: 'The full picture, perfectly balanced', status: 'coming-soon' },
+    { name: 'Focal', icon: '🎯', tagline: 'Laser focused on your taste', status: 'coming-soon' },
+    { name: 'Prism', icon: '🔍', tagline: 'Refracts your interests into new finds', status: 'coming-soon' },
+  ];
 
   constructor(
     private videoService: VideoService,
@@ -27,19 +36,20 @@ export class Feed implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    const user = this.authService.getCurrentUser();
     this.route.queryParams.subscribe(params => {
       if (params['search']) {
         this.searchQuery = params['search'];
         this.searchVideos(params['search']);
       } else {
-        this.loadVideos();
+        this.loadFeed();
       }
     });
   }
 
-  loadVideos(): void {
+  loadFeed(): void {
     this.isLoading = true;
-    this.videoService.getAll().subscribe({
+    this.videoService.getFeed(this.currentMode).subscribe({
       next: (res) => {
         this.isLoading = false;
         if (res.isSuccess) this.videos = res.data;
@@ -50,6 +60,16 @@ export class Feed implements OnInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  switchMode(mode: any): void {
+    if (mode.status === 'coming-soon') return;
+    this.currentMode = mode.name;
+    this.loadFeed();
+
+    if (this.authService.isLoggedIn()) {
+      this.videoService.updateMode(mode.name).subscribe();
+    }
   }
 
   searchVideos(query: string): void {
@@ -70,7 +90,6 @@ export class Feed implements OnInit {
   toggleLike(video: VideoResponse, event: Event): void {
     event.preventDefault();
     event.stopPropagation();
-
     if (!this.authService.isLoggedIn()) return;
 
     this.likeService.toggleLike(video.id).subscribe({

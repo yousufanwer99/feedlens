@@ -71,4 +71,10 @@ export class VideoService {
       totalSeconds
     });
   }
+  updateMode(mode: string): Observable<ApiResponse<boolean>> {
+    return this.http.put<ApiResponse<boolean>>(`${this.url}/mode/${mode}`, {});
+  }
+  getFeed(mode: string): Observable<ApiResponse<VideoResponse[]>> {
+    return this.http.get<ApiResponse<VideoResponse[]>>(`${this.url}/feed/${mode}`);
+  }
 }

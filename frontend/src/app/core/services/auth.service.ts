@@ -32,7 +32,9 @@ export class AuthService {
   updateProfile(request: UpdateProfileRequest): Observable<ApiResponse<UserProfile>> {
     return this.http.put<ApiResponse<UserProfile>>(`${this.url}/profile`, request);
   }
-
+  updateAlgorithmMode(mode: string): Observable<ApiResponse<boolean>> {
+    return this.http.put<ApiResponse<boolean>>(`${environment.apiUrl}/video/mode/${mode}`, {});
+  }
   logout(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('user');

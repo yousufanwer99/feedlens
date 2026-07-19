@@ -1,5 +1,23 @@
 <div class="feed-container">
 
+  <!-- Mode Selector -->
+  <div class="mode-selector">
+    @for (mode of modes; track mode.name) {
+      <button
+        class="mode-btn"
+        [class.active]="currentMode === mode.name"
+        [class.coming-soon]="mode.status === 'coming-soon'"
+        (click)="switchMode(mode)"
+        [title]="mode.status === 'coming-soon' ? 'Coming soon' : mode.tagline">
+        <span class="mode-icon">{{ mode.icon }}</span>
+        <span class="mode-name">{{ mode.name }}</span>
+        @if (mode.status === 'coming-soon') {
+          <span class="soon-badge">Soon</span>
+        }
+      </button>
+    }
+  </div>
+
   @if (searchQuery) {
     <div class="search-header">
       <h2>Results for "{{ searchQuery }}"</h2>
@@ -29,7 +47,6 @@
     <div class="video-grid">
       @for (video of videos; track video.id) {
         <a [routerLink]="['/video', video.id]" class="video-card">
-
           <div class="video-thumb">
             @if (video.thumbnailUrl) {
               <img [src]="video.thumbnailUrl" [alt]="video.title" loading="lazy"/>
@@ -46,14 +63,13 @@
               </svg>
             </div>
           </div>
-
           <div class="video-info">
             <h3 class="video-title">{{ video.title }}</h3>
             <p class="video-meta">
               {{ video.uploaderName }} · {{ formatViews(video.viewCount) }} views · {{ formatDate(video.createdAt) }}
             </p>
             <div class="video-tags-row">
-             <span class="video-category">{{ video.categoryIcon }} {{ video.categoryName }}</span>
+              <span class="video-category">{{ video.categoryIcon }} {{ video.categoryName }}</span>
               <button
                 class="like-btn"
                 [class.liked]="video.isLikedByCurrentUser"
@@ -67,7 +83,6 @@
               </button>
             </div>
           </div>
-
         </a>
       }
     </div>

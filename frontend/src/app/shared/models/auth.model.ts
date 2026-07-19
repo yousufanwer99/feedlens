@@ -34,3 +34,9 @@ export interface UpdateProfileRequest {
   preferredCategories?: string;
   avoidCategories?: string;
 }
+export interface AlgorithmMode {
+  name: string;
+  tagline: string;
+  status: 'available' | 'coming-soon';
+  icon: string;
+}
