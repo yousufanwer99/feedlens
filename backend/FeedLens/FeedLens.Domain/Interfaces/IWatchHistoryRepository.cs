@@ -6,5 +6,6 @@ namespace FeedLens.Domain.Interfaces
     {
         Task RecordAsync(WatchHistory history);
         Task<IEnumerable<WatchHistory>> GetByUserIdAsync(int userId);
+        Task<IEnumerable<string>> GetWatchedCategoryNamesAsync(int userId);
     }
 }

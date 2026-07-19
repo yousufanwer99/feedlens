@@ -23,5 +23,14 @@ namespace FeedLens.Repositories.Repositories
                 .Where(w => w.UserId == userId)
                 .OrderByDescending(w => w.WatchedAt)
                 .ToListAsync();
+
+        public async Task<IEnumerable<string>> GetWatchedCategoryNamesAsync(int userId) =>
+        await _context.WatchHistories
+        .Where(w => w.UserId == userId)
+        .Include(w => w.Video)
+        .ThenInclude(v => v.Category)
+        .Select(w => w.Video.Category.Name)
+        .Distinct()
+        .ToListAsync();
     }
 }

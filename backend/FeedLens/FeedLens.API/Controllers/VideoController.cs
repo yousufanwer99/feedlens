@@ -86,6 +86,24 @@ namespace FeedLens.API.Controllers
             var result = await _watchHistoryService.RecordWatchAsync(userId, id, request);
             return Ok(result);
         }
+
+        [HttpGet("feed/{mode}")]
+        public async Task<IActionResult> GetFeed(string mode)
+        {
+            var userId = GetCurrentUserId();
+            var result = await _videoService.GetFeedAsync(userId, mode);
+            return Ok(result);
+        }
+
+        [Authorize]
+        [HttpPut("mode/{mode}")]
+        public async Task<IActionResult> UpdateMode(string mode)
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var result = await _videoService.UpdateAlgorithmModeAsync(userId, mode);
+            return result.IsSuccess ? Ok(result) : BadRequest(result);
+        }
+
         private int? GetCurrentUserId()
         {
             var claim = User.FindFirstValue(ClaimTypes.NameIdentifier);

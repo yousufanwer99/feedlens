@@ -43,6 +43,7 @@ namespace FeedLens.Services.DTOs
         public string? PreferredCategories { get; set; }
         public string? AvoidCategories { get; set; }
         public DateTime CreatedAt { get; set; }
+        public string AlgorithmMode { get; set; } = "Spectrum";
     }
     public class UpdateProfileDto
     {
@@ -50,5 +51,6 @@ namespace FeedLens.Services.DTOs
         public string? Bio { get; set; }
         public string? PreferredCategories { get; set; }
         public string? AvoidCategories { get; set; }
+        public string? AlgorithmMode { get; set; }
     }
 }

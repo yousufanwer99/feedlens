@@ -13,5 +13,7 @@ namespace FeedLens.Domain.Interfaces
         Task<Video> UpdateAsync(Video video);
         Task DeleteAsync(int id);
         Task IncrementViewCountAsync(int videoId);
+        Task<IEnumerable<Video>> GetFlareAsync(IEnumerable<string> preferredCategories);
+        Task<IEnumerable<Video>> GetDriftAsync(int userId, IEnumerable<string> watchedCategoryNames);
     }
 }

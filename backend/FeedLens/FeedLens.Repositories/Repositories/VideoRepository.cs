@@ -75,5 +75,36 @@ namespace FeedLens.Repositories.Repositories
             }
         }
 
+        public async Task<IEnumerable<Video>> GetFlareAsync(IEnumerable<string> preferredCategories)
+        {
+            var since = DateTime.UtcNow.AddDays(-7);
+            var query = _context.Videos
+                .Include(v => v.User)
+                .Include(v => v.Category)
+                .Include(v => v.Likes)
+                .Where(v => v.CreatedAt >= since);
+
+            if (preferredCategories.Any())
+                query = query.Where(v => preferredCategories.Contains(v.Category.Name));
+
+            return await query
+                .OrderByDescending(v => v.ViewCount + (v.Likes.Count * 2))
+                .Take(20)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Video>> GetDriftAsync(int userId, IEnumerable<string> watchedCategoryNames)
+        {
+            // Get videos from categories user hasn't watched
+            return await _context.Videos
+                .Include(v => v.User)
+                .Include(v => v.Category)
+                .Where(v => !watchedCategoryNames.Contains(v.Category.Name))
+                .Where(v => !_context.WatchHistories.Any(w => w.UserId == userId && w.VideoId == v.Id))
+                .OrderBy(v => Guid.NewGuid())
+                .Take(20)
+                .ToListAsync();
+        }
+
     }
 }

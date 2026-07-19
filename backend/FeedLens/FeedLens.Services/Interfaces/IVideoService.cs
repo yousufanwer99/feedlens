@@ -1,4 +1,5 @@
-﻿using FeedLens.Helpers;
+﻿using FeedLens.Domain.Entities;
+using FeedLens.Helpers;
 using FeedLens.Services.DTOs;
 
 namespace FeedLens.Services.Interfaces
@@ -12,5 +13,8 @@ namespace FeedLens.Services.Interfaces
         Task<ApiResponse<IEnumerable<VideoResponseDto>>> GetMyVideosAsync(int userId);
         Task<ApiResponse<UploadUrlResponseDto>> GetUploadUrlAsync(string fileName, string contentType);
         Task<ApiResponse<bool>> DeleteAsync(int videoId, int userId);
+        Task<ApiResponse<IEnumerable<VideoResponseDto>>> GetFeedAsync(int? userId, string mode);
+        Task<ApiResponse<bool>> UpdateAlgorithmModeAsync(int userId, string mode);
+
     }
 }

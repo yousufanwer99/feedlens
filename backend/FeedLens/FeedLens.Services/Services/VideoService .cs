@@ -4,6 +4,7 @@ using FeedLens.Domain.Interfaces;
 using FeedLens.Helpers;
 using FeedLens.Services.DTOs;
 using FeedLens.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
 namespace FeedLens.Services.Services
@@ -12,13 +13,23 @@ namespace FeedLens.Services.Services
     {
         private readonly IVideoRepository _videoRepo;
         private readonly ILikeRepository _likeRepo;
+        private readonly IWatchHistoryRepository _watchRepo;
+        private readonly IUserRepository _userRepo;
         private readonly IAmazonS3 _s3;
         private readonly IConfiguration _config;
 
-        public VideoService(IVideoRepository videoRepo, ILikeRepository likeRepo, IAmazonS3 s3, IConfiguration config)
+        public VideoService(
+            IVideoRepository videoRepo,
+            ILikeRepository likeRepo,
+            IWatchHistoryRepository watchRepo,
+            IUserRepository userRepo,
+            IAmazonS3 s3,
+            IConfiguration config)
         {
             _videoRepo = videoRepo;
             _likeRepo = likeRepo;
+            _watchRepo = watchRepo;
+            _userRepo = userRepo;
             _s3 = s3;
             _config = config;
         }
@@ -159,6 +170,75 @@ namespace FeedLens.Services.Services
             catch (Exception ex)
             {
                 return ApiResponse<bool>.Failure($"Delete failed: {ex.Message}");
+            }
+        }
+        public async Task<ApiResponse<bool>> UpdateAlgorithmModeAsync(int userId, string mode)
+        {
+            try
+            {
+                var validModes = new[] { "Focal", "Prism", "Spectrum", "Flare", "Drift" };
+                if (!validModes.Contains(mode))
+                    return ApiResponse<bool>.Failure("Invalid algorithm mode");
+
+                var user = await _userRepo.GetByIdAsync(userId);
+                if (user == null)
+                    return ApiResponse<bool>.Failure("User not found");
+
+                user.AlgorithmMode = mode;
+                await _userRepo.UpdateAsync(user);
+                return ApiResponse<bool>.Success(true, $"Mode switched to {mode}");
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<bool>.Failure($"Failed to update mode: {ex.Message}");
+            }
+        }
+
+        public async Task<ApiResponse<IEnumerable<VideoResponseDto>>> GetFeedAsync(int? userId, string mode)
+        {
+            try
+            {
+                IEnumerable<Domain.Entities.Video> videos;
+                var preferredCategories = new List<string>();
+
+                if (userId.HasValue)
+                {
+                    var user = await _userRepo.GetByIdAsync(userId.Value);
+                    if (user?.PreferredCategories != null)
+                    {
+                        try { preferredCategories = System.Text.Json.JsonSerializer.Deserialize<List<string>>(user.PreferredCategories) ?? new(); }
+                        catch { preferredCategories = new(); }
+                    }
+                }
+
+                switch (mode)
+                {
+                    case "Flare":
+                        videos = await _videoRepo.GetFlareAsync(preferredCategories);
+                        break;
+
+                    case "Drift":
+                        var watchedCategories = userId.HasValue
+                            ? (await _watchRepo.GetWatchedCategoryNamesAsync(userId.Value)).ToList()
+                            : new List<string>();
+                        videos = await _videoRepo.GetDriftAsync(userId ?? 0, watchedCategories);
+                        break;
+
+                    default:
+                        // Focal, Prism, Spectrum — fall back to all videos for now
+                        videos = await _videoRepo.GetAllAsync();
+                        break;
+                }
+
+                var dtos = new List<VideoResponseDto>();
+                foreach (var v in videos)
+                    dtos.Add(await MapToDtoAsync(v, userId));
+
+                return ApiResponse<IEnumerable<VideoResponseDto>>.Success(dtos);
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<IEnumerable<VideoResponseDto>>.Failure($"Failed to load feed: {ex.Message}");
             }
         }
         private async Task<VideoResponseDto> MapToDtoAsync(Domain.Entities.Video video, int? currentUserId)

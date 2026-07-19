@@ -17,5 +17,6 @@
 
         public ICollection<Video> Videos { get; set; } = new List<Video>();
         public ICollection<Like> Likes { get; set; } = new List<Like>();
+        public string AlgorithmMode { get; set; } = "Spectrum";
     }
 }

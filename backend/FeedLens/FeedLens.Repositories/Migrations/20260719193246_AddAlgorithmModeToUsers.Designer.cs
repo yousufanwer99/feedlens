@@ -4,6 +4,7 @@ using FeedLens.Repositories.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FeedLens.Repositories.Migrations
 {
     [DbContext(typeof(FeedLensDbContext))]
-    partial class FeedLensDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260719193246_AddAlgorithmModeToUsers")]
+    partial class AddAlgorithmModeToUsers
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

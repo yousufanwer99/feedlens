@@ -108,6 +108,7 @@ namespace FeedLens.Services.Services
                 if (request.Bio != null) user.Bio = request.Bio;
                 if (request.PreferredCategories != null) user.PreferredCategories = request.PreferredCategories;
                 if (request.AvoidCategories != null) user.AvoidCategories = request.AvoidCategories;
+                if (request.AlgorithmMode != null) user.AlgorithmMode = request.AlgorithmMode;
 
                 var updated = await _userRepo.UpdateAsync(user);
                 return ApiResponse<UserProfileDto>.Success(MapToProfileDto(updated), "Profile updated");
@@ -149,7 +150,8 @@ namespace FeedLens.Services.Services
             AvatarUrl = user.AvatarUrl,
             PreferredCategories = user.PreferredCategories,
             AvoidCategories = user.AvoidCategories,
-            CreatedAt = user.CreatedAt
+            CreatedAt = user.CreatedAt,
+            AlgorithmMode = user.AlgorithmMode
         };
     }
 }
